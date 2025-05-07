@@ -12,6 +12,7 @@ describe('BinsService', () => {
       bin: {
         findMany: jest.fn(),
         create: jest.fn(),
+        update: jest.fn(),
       },
     };
     const module: TestingModule = await Test.createTestingModule({
@@ -124,6 +125,86 @@ describe('BinsService', () => {
         data: { latitude: 12.34, longitude: 56.78 },
       });
       expect(result).toEqual(updatedBin);
+    });
+  });
+
+  describe('acceptBin', () => {
+    it('should update bin with acceptedAt set to current date if accept is true', async () => {
+      const binId = 1;
+      const acceptedBin: Bin = {
+        id: binId,
+        type: 'bin',
+        latitude: new Prisma.Decimal('10.0'),
+        longitude: new Prisma.Decimal('20.0'),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        deletedAt: null,
+        acceptedAt: new Date(),
+        createdById: 1,
+      };
+      db.bin.update.mockResolvedValue(acceptedBin);
+
+      const result = await service.acceptBin(binId, true);
+
+      expect(db.bin.update).toHaveBeenCalledWith({
+        where: { id: binId },
+        data: { acceptedAt: expect.any(Date) },
+      });
+      expect(result).toEqual(acceptedBin);
+      expect(result.acceptedAt).toBeInstanceOf(Date);
+    });
+
+    it('should update bin with acceptedAt set to null if accept is false', async () => {
+      const binId = 2;
+      const rejectedBin: Bin = {
+        id: binId,
+        type: 'bin',
+        latitude: new Prisma.Decimal('10.0'),
+        longitude: new Prisma.Decimal('20.0'),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        deletedAt: null,
+        acceptedAt: null,
+        createdById: 1,
+      };
+      db.bin.update.mockResolvedValue(rejectedBin);
+
+      const result = await service.acceptBin(binId, false);
+
+      expect(db.bin.update).toHaveBeenCalledWith({
+        where: { id: binId },
+        data: { acceptedAt: null },
+      });
+      expect(result).toEqual(rejectedBin);
+      expect(result.acceptedAt).toBeNull();
+    });
+
+    it('should convert binId to Number if provided as string (though service expects number)', async () => {
+      const binIdString = '3';
+      const binIdNumber = 3;
+      const acceptedBin: Bin = {
+        id: binIdNumber,
+        type: 'bin',
+        latitude: new Prisma.Decimal('10.0'),
+        longitude: new Prisma.Decimal('20.0'),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        deletedAt: null,
+        acceptedAt: new Date(),
+        createdById: 1,
+      };
+      db.bin.update.mockResolvedValue(acceptedBin);
+
+      const result = await service.acceptBin(
+        binIdString as any as number,
+        true,
+      );
+
+      expect(db.bin.update).toHaveBeenCalledWith({
+        where: { id: binIdNumber },
+        data: { acceptedAt: expect.any(Date) },
+      });
+      expect(result).toEqual(acceptedBin);
     });
   });
 });
