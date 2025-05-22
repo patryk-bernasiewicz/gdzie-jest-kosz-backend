@@ -13,6 +13,7 @@ describe('BinsService', () => {
         findMany: jest.fn(),
         create: jest.fn(),
         update: jest.fn(),
+        findUnique: jest.fn(),
       },
     };
     const module: TestingModule = await Test.createTestingModule({
@@ -125,6 +126,67 @@ describe('BinsService', () => {
         data: { latitude: 12.34, longitude: 56.78 },
       });
       expect(result).toEqual(updatedBin);
+    });
+  });
+
+  describe('getBinById', () => {
+    it('should return bin when found', async () => {
+      const binId = 5;
+      const bin: Bin = {
+        id: binId,
+        type: 'bin',
+        latitude: new Prisma.Decimal('15.5'),
+        longitude: new Prisma.Decimal('25.5'),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        deletedAt: null,
+        acceptedAt: new Date(),
+        createdById: 3,
+      };
+      db.bin.findUnique.mockResolvedValue(bin);
+
+      const result = await service.getBinById(binId);
+
+      expect(db.bin.findUnique).toHaveBeenCalledWith({
+        where: { id: Number(binId) },
+      });
+      expect(result).toEqual(bin);
+    });
+
+    it('should return null when bin is not found', async () => {
+      const binId = 999;
+      db.bin.findUnique.mockResolvedValue(null);
+
+      const result = await service.getBinById(binId);
+
+      expect(db.bin.findUnique).toHaveBeenCalledWith({
+        where: { id: Number(binId) },
+      });
+      expect(result).toBeNull();
+    });
+
+    it('should convert binId to Number if provided as string', async () => {
+      const binIdString = '7';
+      const binIdNumber = 7;
+      const bin: Bin = {
+        id: binIdNumber,
+        type: 'bin',
+        latitude: new Prisma.Decimal('17.7'),
+        longitude: new Prisma.Decimal('27.7'),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        deletedAt: null,
+        acceptedAt: null,
+        createdById: 4,
+      };
+      db.bin.findUnique.mockResolvedValue(bin);
+
+      const result = await service.getBinById(binIdString as any as number);
+
+      expect(db.bin.findUnique).toHaveBeenCalledWith({
+        where: { id: binIdNumber },
+      });
+      expect(result).toEqual(bin);
     });
   });
 
