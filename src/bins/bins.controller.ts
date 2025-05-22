@@ -197,6 +197,11 @@ export class BinsController {
     @Param('binId', ParseIntPipe) binId: number,
     @Body() acceptBinDto: AcceptBinDto,
   ): Promise<Bin> {
+    const bin = await this.binsService.getBinById(binId);
+    if (!bin) {
+      throw new NotFoundException('Bin not found');
+    }
+
     return this.binsService.acceptBin(binId, acceptBinDto.accept);
   }
 }

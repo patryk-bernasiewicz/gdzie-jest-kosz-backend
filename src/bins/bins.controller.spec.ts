@@ -242,26 +242,41 @@ describe('BinsController', () => {
     };
 
     it('should call binsService.acceptBin with true and return accepted bin', async () => {
+      binsService.getBinById.mockResolvedValue(mockAcceptedBin);
       binsService.acceptBin.mockResolvedValue(mockAcceptedBin);
 
       const result = await controller.acceptBin(binId, acceptBinDto);
 
+      expect(binsService.getBinById).toHaveBeenCalledWith(binId);
       expect(binsService.acceptBin).toHaveBeenCalledWith(binId, true);
       expect(result).toEqual(mockAcceptedBin);
     });
 
     it('should call binsService.acceptBin with false and return rejected bin', async () => {
       const rejectDto: AcceptBinDto = { accept: false };
+      binsService.getBinById.mockResolvedValue(mockRejectedBin);
       binsService.acceptBin.mockResolvedValue(mockRejectedBin);
 
       const result = await controller.acceptBin(binId, rejectDto);
 
+      expect(binsService.getBinById).toHaveBeenCalledWith(binId);
       expect(binsService.acceptBin).toHaveBeenCalledWith(binId, false);
       expect(result).toEqual(mockRejectedBin);
     });
 
+    it('should throw NotFoundException if bin is not found', async () => {
+      binsService.getBinById.mockResolvedValue(null);
+
+      await expect(controller.acceptBin(binId, acceptBinDto)).rejects.toThrow(
+        'Bin not found'
+      );
+      expect(binsService.getBinById).toHaveBeenCalledWith(binId);
+      expect(binsService.acceptBin).not.toHaveBeenCalled();
+    });
+
     it('should propagate error if binsService.acceptBin throws', async () => {
       const errorMessage = 'Service error';
+      binsService.getBinById.mockResolvedValue(mockAcceptedBin);
       binsService.acceptBin.mockRejectedValue(new Error(errorMessage));
 
       await expect(controller.acceptBin(binId, acceptBinDto)).rejects.toThrow(
