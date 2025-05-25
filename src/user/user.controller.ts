@@ -23,10 +23,4 @@ export class UserController {
     this.logger.log('GET /user/me called');
     return user;
   }
-
-  @Get()
-  getHello(): string {
-    this.logger.log('GET /user called');
-    return 'Hello World!';
-  }
 }
