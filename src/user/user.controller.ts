@@ -20,6 +20,7 @@ export class UserController {
   @Get('me')
   @UseGuards(ClerkAuthGuard)
   async authenticateAndUpsert(@CurrentUser() user: User): Promise<User> {
+    this.logger.log('GET /user/me called');
     return user;
   }
 
