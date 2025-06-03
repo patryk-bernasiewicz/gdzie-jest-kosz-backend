@@ -4,8 +4,6 @@ import { AppService } from './app.service';
 import { DatabaseModule } from './database/database.module';
 import { BinsModule } from './bins/bins.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { UserModule } from './user/user.module';
-import { ClerkModule } from './clerk/clerk.module';
 import { AuthModule } from './auth/auth.module';
 import { getConfigOptions } from './config/env.config';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
@@ -22,8 +20,6 @@ import { APP_GUARD } from '@nestjs/core';
     ]),
     DatabaseModule,
     BinsModule,
-    UserModule,
-    ClerkModule,
     AuthModule,
   ],
   controllers: [AppController],
